@@ -39,6 +39,7 @@ from threading import Timer
 from ovos_plugin_manager.phal import PHALPlugin
 from ovos_utils.log import LOG
 from ovos_utils.signal import get_ipc_directory
+from ovos_utils.gui import GUITracker
 
 
 def _write_data(dictionary):
@@ -117,6 +118,25 @@ class DisplayManagerIPC(PHALPlugin):
         super().__init__(bus, "display_manager_ipc")
         self.skill_id = ""
         self._should_remove = True
+
+        # GUI handlers
+        self.gui = GUITracker(self.bus)
+        self.gui.on_idle = self.on_idle
+        self.gui.on_active = self.on_active
+        self.gui.on_remove_namespace = self.on_remove_namespace
+
+    def on_idle(self, namespace):
+        self.remove_active()
+        _write_data({"idle_skill": namespace})
+
+    def on_active(self, namespace):
+        self.set_active(namespace)
+        _write_data({"idle_skill": ""})
+
+    def on_remove_namespace(self, namespace, index):
+        data = _read_data()
+        if "active_skill" in data and data["active_skill"] == namespace:
+            self.remove_active()
 
     def set_active(self, skill_id=None):
         """ Sets skill_id as active in the display Manager
