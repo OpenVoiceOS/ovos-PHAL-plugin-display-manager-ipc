@@ -114,8 +114,9 @@ def _read_data():
 
 
 class DisplayManagerIPC(PHALPlugin):
-    def __init__(self, bus=None):
-        super().__init__(bus, "display_manager_ipc")
+
+    def __init__(self, bus=None, config=None):
+        super().__init__(bus=bus, name="ovos-PHAL-plugin-display-manager-ipc", config=config)
         self.skill_id = ""
         self._should_remove = True
 
